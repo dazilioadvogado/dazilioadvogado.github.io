@@ -108,7 +108,7 @@
         <div class="editor-area" id="editor" contenteditable="true"></div>
 
         <div class="btn-row">
-            <button class="btn btn-gold" id="btnSalvar">Salvar alterações</button>
+            <button class="btn btn-gold" onclick="salvarEdicao()">Salvar alterações</button>
             <a href="artigos.html" class="btn btn-outline">Cancelar</a>
             <span class="msg" id="msg"></span>
         </div>
@@ -197,22 +197,19 @@
         document.getElementById('editor').focus();
     });
 
-    document.getElementById('btnSalvar').addEventListener('click', function() {
+    window.salvarEdicao = function() {
         var titulo = document.getElementById('artTitulo').value.trim();
         var conteudo = document.getElementById('editor').innerHTML.trim();
         var msg = document.getElementById('msg');
-
         if (!titulo) { msg.textContent = 'Digite um titulo.'; msg.className = 'msg error'; return; }
-
         artigo.titulo = titulo;
         artigo.conteudo = conteudo;
         artigo.imagem = base64Image || '';
         localStorage.setItem('artigos_publicados', JSON.stringify(artigos));
-
         msg.textContent = 'Alteracoes salvas!';
         msg.className = 'msg success';
         setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
-    });
+    };
 })();
 </script>
 </body>
