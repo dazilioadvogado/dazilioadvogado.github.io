@@ -82,9 +82,9 @@
     </div>
 </footer>
 
-<script src="script.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function(){
+    setTimeout(function(){
     firebase.initializeApp({
         apiKey: ***        authDomain: "site-469cc.firebaseapp.com",
         projectId: "site-469cc",
@@ -140,7 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
         msg.className = 'msg success';
         setTimeout(function(){ window.location.href = 'artigos.html'; }, 1000);
     });
-});
+    }, 300);
+})();
 </script>
+<script src="script.js"></script>
 </body>
 </html>
