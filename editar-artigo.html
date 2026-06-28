@@ -34,10 +34,13 @@
 <section class="editor-page"><div class="editor-container" id="ec"><h1>Carregando...</h1><div class="section-line"></div></div></section>
 <footer class="footer"><div class="container"><div class="footer-inner"><div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitoria</span></div><div class="footer-links"><a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuacao</a><a href="artigos.html">Artigos</a><a href="index.html#formacao">Formacao</a><a href="index.html#contato">Contato</a></div><p class="footer-copy">&copy; 2026</p></div></div></footer>
 <script>
-var fc={apiKey:"AIza...5PqY,authDomain:"site-469cc.firebaseapp.com",projectId:"site-469cc",appId:"1:542339087164:web:7b7d10074ab065feea3c39"};
+var fc={};
+fc.apiKey="AIza...5PqY";
+fc.authDomain="site-469cc.firebaseapp.com";
+fc.projectId="site-469cc";
+fc.appId="1:542339087164:web:7b7d10074ab065feea3c39";
 firebase.initializeApp(fc);
 firebase.auth().onAuthStateChanged(function(u){if(!u)location.href="login.html"});
-
 var p=new URLSearchParams(location.search),aid=p.get("id");
 var arts=JSON.parse(localStorage.getItem("artigos_publicados")||"[]");
 var art=arts.find(function(a){return a.id===aid});
