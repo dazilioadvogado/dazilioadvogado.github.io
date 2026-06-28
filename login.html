@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,58 +9,67 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <style>
         .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
-        .login-box { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.12); padding: 3rem 2.5rem; max-width: 420px; width: 100%; text-align: center; }
+        .login-box { background: var(--navy-light); border: 1px solid rgba(201,167,110,0.12); padding: 3rem 2.5rem; max-width: 420px; width: 100%; text-align: center; }
         .login-box h1 { font-family: var(--font-serif); color: var(--white); font-size: 1.8rem; margin-bottom: 0.5rem; }
         .login-box .section-line { margin-bottom: 2rem; }
         .login-box label { display: block; text-align: left; color: var(--gray); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
-        .login-box input { width: 100%; padding: 0.9rem 1rem; background: var(--navy); border: 1px solid rgba(201, 167, 110, 0.15); color: var(--cream-dim); font-family: var(--font-sans); font-size: 0.95rem; margin-bottom: 1.2rem; outline: none; transition: border-color 0.3s; }
+        .login-box input[type=email], .login-box input[type=password] { width: 100%; padding: 0.9rem 1rem; background: var(--navy); border: 1px solid rgba(201,167,110,0.15); color: var(--cream-dim); font-family: var(--font-sans); font-size: 0.95rem; margin-bottom: 1.2rem; outline: none; transition: border-color 0.3s; }
         .login-box input:focus { border-color: var(--gold); }
-        .login-box input:disabled { opacity: 0.5; }
-        .login-box .btn { margin-top: 0.5rem; }
+        .login-box .btn { margin-top: 0.5rem; cursor: pointer; }
         .login-msg { margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; }
         .login-msg.error { color: #e74c3c; }
         .login-msg.success { color: #2ecc71; }
-        .login-msg.locked { color: #f39c12; }
-        .login-links { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        .login-links a { color: var(--gray); font-size: 0.85rem; text-decoration: none; }
-        .login-links a:hover { color: var(--gold); }
-        .show-password { display: flex; align-items: center; gap: 0.5rem; text-align: left; margin-bottom: 0.5rem; }
+        .login-msg.info { color: var(--gold); }
+        .back-link { display: block; margin-top: 1.5rem; color: var(--gray); font-size: 0.85rem; text-decoration: none; }
+        .back-link:hover { color: var(--gold); }
+        .register-link { display: block; margin-top: 0.8rem; color: var(--gold); font-size: 0.85rem; text-decoration: none; }
+        .register-link:hover { text-decoration: underline; }
+        .show-password { display: flex; align-items: center; gap: 0.5rem; text-align: left; margin-bottom: 1rem; }
         .show-password input[type=checkbox] { width: auto; margin: 0; }
         .show-password label { font-size: 0.75rem; text-transform: none; letter-spacing: 0; margin: 0; color: var(--gray-light); }
-        .lockout-timer { text-align: center; color: var(--gold); font-size: 0.9rem; margin: 1rem 0; display: none; }
-        .lockout-timer.visible { display: block; }
+        .lockout { display: none; text-align: center; padding: 1rem 0; }
+        .lockout.visible { display: block; }
+        .lockout p { color: #e74c3c; font-size: 0.95rem; }
+        .logged-in-box { display: none; }
+        .logged-in-box.visible { display: block; }
+        .logged-in-box p { color: var(--cream-dim); margin-bottom: 1.5rem; }
+        .logged-in-box .btn-row { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
     </style>
 </head>
-
 <body>
-    <nav class="nav" id="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
-            <ul class="nav-links">
-                <li><a href="index.html#sobre">Sobre</a></li>
-                <li><a href="index.html#atuacao">Atuação</a></li>
-                <li><a href="index.html#formacao">Formação</a></li>
-                <li><a href="index.html#contato">Contato</a></li>
-                <li><a href="artigos.html">Artigos</a></li>
-            </ul>
-            <button class="nav-toggle" id="navToggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+        <ul class="nav-links">
+            <li><a href="index.html#sobre">Sobre</a></li><li><a href="index.html#atuacao">Atuação</a></li>
+            <li><a href="index.html#formacao">Formação</a></li><li><a href="index.html#contato">Contato</a></li>
+            <li><a href="artigos.html">Artigos</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
 
-    <section class="login-page">
-        <div class="login-box">
+<section class="login-page">
+    <div class="login-box">
+        <div id="loggedInBox" class="logged-in-box">
             <h1>Área Restrita</h1>
             <div class="section-line"></div>
+            <p id="loggedInMsg">Verificando...</p>
+            <div class="btn-row">
+                <button class="btn btn-gold" onclick="window.location.href='artigos.html'">Continuar para Artigos</button>
+                <button class="btn btn-outline" id="btnLogout">Sair</button>
+            </div>
+        </div>
 
-            <div class="lockout-timer" id="lockoutTimer"></div>
-
+        <div id="loginFormBox">
+            <h1>Área Restrita</h1>
+            <div class="section-line"></div>
+            <div class="lockout" id="lockoutTimer"><p>🔒 Conta bloqueada.</p></div>
             <form id="loginForm">
                 <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" placeholder="Digite seu email" required>
@@ -74,188 +82,95 @@
                 <button type="submit" class="btn btn-gold btn-full" id="loginBtn">Entrar</button>
                 <p class="login-msg" id="loginMsg"></p>
             </form>
-
-            <div class="login-links">
-                <a href="reset.html">Esqueci minha senha</a>
-                <a href="register.html">Criar uma conta</a>
-                <a href="artigos.html">← Voltar para Artigos</a>
-            </div>
+            <a href="register.html" class="register-link">Criar conta</a>
+            <a href="artigos.html" class="back-link">← Voltar para Artigos</a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-inner">
-                <div class="footer-brand">
-                    <span class="footer-logo">Advocacia Dazilio da Vitória</span>
-                </div>
-                <div class="footer-links">
-                    <a href="index.html#sobre">Sobre</a>
-                    <a href="index.html#atuacao">Atuação</a>
-                    <a href="artigos.html">Artigos</a>
-                    <a href="index.html#formacao">Formação</a>
-                    <a href="index.html#contato">Contato</a>
-                </div>
-                <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória. Todos os direitos reservados.</p>
+<footer class="footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitória</span></div>
+            <div class="footer-links">
+                <a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuação</a>
+                <a href="artigos.html">Artigos</a><a href="index.html#formacao">Formação</a><a href="index.html#contato">Contato</a>
             </div>
+            <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória</p>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <script src="script.js"></script>
-    <script>
-        (function() {
-            // Firebase init
-            firebase.initializeApp({
-                apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
-                authDomain: "site-469cc.firebaseapp.com",
-                projectId: "site-469cc",
-                storageBucket: "site-469cc.firebasestorage.app",
-                messagingSenderId: "542339087164",
-                appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+<script src="script.js"></script>
+<script>
+(function(){
+    var MAX_ATTEMPTS = 3, LOCK_MINUTES = 30, lockKey = 'login_lockout';
+    function isLocked(){ var d=JSON.parse(localStorage.getItem(lockKey)||'{"until":0}'); return Date.now() < d.until; }
+    function recordFailedAttempt(){ var d=JSON.parse(localStorage.getItem(lockKey)||'{"count":0,"until":0}'); d.count++; if(d.count>=MAX_ATTEMPTS){ d.until=Date.now()+LOCK_MINUTES*60*1000; d.count=0; } localStorage.setItem(lockKey,JSON.stringify(d)); }
+    function clearLockout(){ localStorage.removeItem(lockKey); }
+    function updateLockUI(){ var form=document.getElementById('loginFormBox'); var lock=document.getElementById('lockoutTimer'); var remaining=JSON.parse(localStorage.getItem(lockKey)||'{"until":0}').until-Date.now(); if(remaining>0){ form.style.display='none'; lock.classList.add('visible'); var m=Math.floor(remaining/60000); var s=Math.floor((remaining%60000)/1000); lock.querySelector('p').textContent='🔒 Bloqueado. Tente novamente em '+m+'m '+s+'s.'; setTimeout(updateLockUI,1000); } else { form.style.display='block'; lock.classList.remove('visible'); } }
+    if(isLocked()) updateLockUI();
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
+        authDomain: "site-469cc.firebaseapp.com",
+        projectId: "site-469cc",
+        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    var loggedInBox = document.getElementById('loggedInBox');
+    var loginFormBox = document.getElementById('loginFormBox');
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            loggedInBox.classList.add('visible');
+            loginFormBox.style.display = 'none';
+            document.getElementById('loggedInMsg').textContent = 'Você já está logado como ' + user.email + '.';
+        } else {
+            loggedInBox.classList.remove('visible');
+            loginFormBox.style.display = 'block';
+        }
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', function() {
+        firebase.auth().signOut().then(function() {
+            window.location.reload();
+        });
+    });
+
+    document.getElementById('showLogin').addEventListener('change', function() {
+        document.getElementById('loginPass').type = this.checked ? 'text' : 'password';
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (isLocked()) { updateLockUI(); return; }
+        var email = document.getElementById('loginEmail').value.trim();
+        var pass = document.getElementById('loginPass').value;
+        var btn = document.getElementById('loginBtn');
+        var msg = document.getElementById('loginMsg');
+        btn.textContent = 'Entrando...'; btn.disabled = true;
+        firebase.auth().signInWithEmailAndPassword(email, pass)
+            .then(function() {
+                clearLockout();
+                msg.textContent = 'Login realizado! Redirecionando...';
+                msg.className = 'login-msg success';
+                setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
+            })
+            .catch(function(error) {
+                recordFailedAttempt();
+                btn.textContent = 'Entrar'; btn.disabled = false;
+                if (isLocked()) { updateLockUI(); return; }
+                var code = error.code;
+                if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') { msg.textContent = 'Email ou senha incorretos.'; }
+                else if (code === 'auth/invalid-email') { msg.textContent = 'Email inválido.'; }
+                else if (code === 'auth/too-many-requests') { msg.textContent = 'Muitas tentativas. Aguarde um momento.'; }
+                else { msg.textContent = 'Erro ao fazer login. Tente novamente.'; }
+                msg.className = 'login-msg error';
             });
-
-            var auth = firebase.auth();
-
-            // Rate limiting
-            var MAX_ATTEMPTS = 2;
-            var LOCK_MINUTES = 30;
-            var lockKey = 'login_lockout';
-
-            function isLocked() {
-                var data = JSON.parse(localStorage.getItem(lockKey) || 'null');
-                if (!data) return false;
-                if (Date.now() > data.until) {
-                    localStorage.removeItem(lockKey);
-                    return false;
-                }
-                return true;
-            }
-
-            function getLockRemainingMs() {
-                var data = JSON.parse(localStorage.getItem(lockKey) || 'null');
-                if (!data) return 0;
-                return Math.max(0, data.until - Date.now());
-            }
-
-            function recordFailedAttempt() {
-                var data = JSON.parse(localStorage.getItem(lockKey) || '{"count":0,"until":0}');
-                data.count++;
-                if (data.count >= MAX_ATTEMPTS) {
-                    data.until = Date.now() + LOCK_MINUTES * 60 * 1000;
-                    data.count = 0;
-                }
-                localStorage.setItem(lockKey, JSON.stringify(data));
-            }
-
-            function clearLockout() {
-                localStorage.removeItem(lockKey);
-            }
-
-            function updateUI() {
-                var form = document.getElementById('loginForm');
-                var btn = document.getElementById('loginBtn');
-                var email = document.getElementById('loginEmail');
-                var pass = document.getElementById('loginPass');
-                var timer = document.getElementById('lockoutTimer');
-
-                if (isLocked()) {
-                    form.style.display = 'none';
-                    timer.classList.add('visible');
-                    showTimer();
-                } else {
-                    form.style.display = 'block';
-                    timer.classList.remove('visible');
-                }
-            }
-
-            function showTimer() {
-                var timer = document.getElementById('lockoutTimer');
-                var remaining = getLockRemainingMs();
-                var mins = Math.floor(remaining / 60000);
-                var secs = Math.floor((remaining % 60000) / 1000);
-                timer.textContent = '🔒 Conta bloqueada. Tente novamente em ' + mins + 'm ' + secs + 's.';
-
-                if (remaining > 0) {
-                    var interval = setInterval(function() {
-                        remaining = getLockRemainingMs();
-                        if (remaining <= 0) {
-                            clearInterval(interval);
-                            updateUI();
-                            return;
-                        }
-                        mins = Math.floor(remaining / 60000);
-                        secs = Math.floor((remaining % 60000) / 1000);
-                        timer.textContent = '🔒 Conta bloqueada. Tente novamente em ' + mins + 'm ' + secs + 's.';
-                    }, 1000);
-                }
-            }
-
-            updateUI();
-
-            // If already logged in, redirect
-            auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    document.getElementById('loginMsg').textContent = 'Você já está logado. Redirecionando...';
-                    document.getElementById('loginMsg').className = 'login-msg success';
-                    setTimeout(function() { window.location.href = 'artigos.html'; }, 500);
-                }
-            });
-
-            // Show password toggle
-            document.getElementById('showLogin').addEventListener('change', function() {
-                document.getElementById('loginPass').type = this.checked ? 'text' : 'password';
-            });
-
-            // Login
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                if (isLocked()) {
-                    updateUI();
-                    return;
-                }
-
-                var email = document.getElementById('loginEmail').value.trim();
-                var pass = document.getElementById('loginPass').value;
-                var msg = document.getElementById('loginMsg');
-                var btn = document.getElementById('loginBtn');
-
-                btn.textContent = 'Entrando...';
-                btn.disabled = true;
-
-                auth.signInWithEmailAndPassword(email, pass)
-                    .then(function() {
-                        clearLockout();
-                        msg.textContent = 'Login realizado! Redirecionando...';
-                        msg.className = 'login-msg success';
-                        setTimeout(function() { window.location.href = 'artigos.html'; }, 800);
-                    })
-                    .catch(function(error) {
-                        recordFailedAttempt();
-                        btn.textContent = 'Entrar';
-                        btn.disabled = false;
-
-                        if (isLocked()) {
-                            updateUI();
-                            return;
-                        }
-
-                        // Translate Firebase errors to generic messages
-                        var code = error.code;
-                        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
-                            msg.textContent = 'Email ou senha incorretos.';
-                        } else if (code === 'auth/invalid-email') {
-                            msg.textContent = 'Email inválido.';
-                        } else if (code === 'auth/too-many-requests') {
-                            msg.textContent = 'Muitas tentativas. Aguarde um momento.';
-                        } else {
-                            msg.textContent = 'Erro ao fazer login. Tente novamente.';
-                        }
-                        msg.className = 'login-msg error';
-                    });
-            });
-        })();
-    </script>
+    });
+})();
+</script>
 </body>
-
 </html>
