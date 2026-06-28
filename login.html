@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
-        .login-box { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.12); padding: 3rem 2.5rem; max-width: 400px; width: 100%; text-align: center; }
+        .login-box { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.12); padding: 3rem 2.5rem; max-width: 420px; width: 100%; text-align: center; }
         .login-box h1 { font-family: var(--font-serif); color: var(--white); font-size: 1.8rem; margin-bottom: 0.5rem; }
         .login-box .section-line { margin-bottom: 2rem; }
         .login-box label { display: block; text-align: left; color: var(--gray); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
@@ -23,8 +23,14 @@
         .login-msg { margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; }
         .login-msg.error { color: #e74c3c; }
         .login-msg.success { color: #2ecc71; }
+        .login-hint { color: var(--gray); font-size: 0.8rem; margin-top: 1rem; }
         .back-link { display: block; margin-top: 1.5rem; color: var(--gray); font-size: 0.85rem; text-decoration: none; }
         .back-link:hover { color: var(--gold); }
+        .setup-extra { display: none; }
+        .setup-extra.visible { display: block; }
+        .show-password { display: flex; align-items: center; gap: 0.5rem; text-align: left; margin-bottom: 1rem; }
+        .show-password input[type=checkbox] { width: auto; margin: 0; }
+        .show-password label { font-size: 0.75rem; text-transform: none; letter-spacing: 0; margin: 0; color: var(--gray-light); }
     </style>
 </head>
 
@@ -46,14 +52,34 @@
     </nav>
 
     <section class="login-page">
-        <div class="login-box">
+        <div id="setupBox" class="login-box" style="display:none;">
+            <h1>Criar Conta</h1>
+            <div class="section-line"></div>
+            <p class="login-hint">Primeiro acesso: defina sua senha de administrador.</p>
+            <form id="setupForm" style="margin-top:1rem;">
+                <label for="setupPass">Senha</label>
+                <input type="password" id="setupPass" placeholder="Crie uma senha forte" required minlength="6">
+                <label for="setupConfirm">Confirmar senha</label>
+                <input type="password" id="setupConfirm" placeholder="Repita a senha" required minlength="6">
+                <div class="show-password">
+                    <input type="checkbox" id="showSetup">
+                    <label for="showSetup">Mostrar senha</label>
+                </div>
+                <button type="submit" class="btn btn-gold btn-full">Criar Conta</button>
+                <p class="login-msg" id="setupMsg"></p>
+            </form>
+        </div>
+
+        <div id="loginBox" class="login-box">
             <h1>Área Restrita</h1>
             <div class="section-line"></div>
             <form id="loginForm">
-                <label for="username">Usuário</label>
-                <input type="text" id="username" placeholder="Digite seu usuário" required>
-                <label for="password">Senha</label>
-                <input type="password" id="password" placeholder="Digite sua senha" required>
+                <label for="loginPass">Senha</label>
+                <input type="password" id="loginPass" placeholder="Digite sua senha" required>
+                <div class="show-password">
+                    <input type="checkbox" id="showLogin">
+                    <label for="showLogin">Mostrar senha</label>
+                </div>
                 <button type="submit" class="btn btn-gold btn-full">Entrar</button>
                 <p class="login-msg" id="loginMsg"></p>
             </form>
@@ -81,22 +107,89 @@
 
     <script src="script.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var user = document.getElementById('username').value;
-            var pass = document.getElementById('password').value;
-            var msg = document.getElementById('loginMsg');
+        (function() {
+            // Hash password using SHA-256
+            async function hash(text) {
+                var data = new TextEncoder().encode(text);
+                var buf = await crypto.subtle.digest('SHA-256', data);
+                return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+            }
 
-            if (user === 'admin' && pass === 'dazilio2026') {
+            var setupBox = document.getElementById('setupBox');
+            var loginBox = document.getElementById('loginBox');
+
+            // Check if account already exists
+            var storedHash = localStorage.getItem('admin_hash');
+            if (!storedHash) {
+                setupBox.style.display = 'block';
+                loginBox.style.display = 'none';
+            } else {
+                setupBox.style.display = 'none';
+                loginBox.style.display = 'block';
+            }
+
+            // Toggle password visibility
+            document.getElementById('showSetup').addEventListener('change', function() {
+                var type = this.checked ? 'text' : 'password';
+                document.getElementById('setupPass').type = type;
+                document.getElementById('setupConfirm').type = type;
+            });
+            document.getElementById('showLogin').addEventListener('change', function() {
+                document.getElementById('loginPass').type = this.checked ? 'text' : 'password';
+            });
+
+            // Setup (create account)
+            document.getElementById('setupForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                var pass = document.getElementById('setupPass').value;
+                var confirm = document.getElementById('setupConfirm').value;
+                var msg = document.getElementById('setupMsg');
+
+                if (pass.length < 6) {
+                    msg.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                    msg.className = 'login-msg error';
+                    return;
+                }
+                if (pass !== confirm) {
+                    msg.textContent = 'As senhas não conferem.';
+                    msg.className = 'login-msg error';
+                    return;
+                }
+
+                var h = await hash(pass);
+                localStorage.setItem('admin_hash', h);
                 localStorage.setItem('admin_logado', 'true');
-                msg.textContent = 'Login realizado com sucesso!';
+                msg.textContent = 'Conta criada! Redirecionando...';
                 msg.className = 'login-msg success';
                 setTimeout(function() { window.location.href = 'artigos.html'; }, 800);
-            } else {
-                msg.textContent = 'Usuário ou senha incorretos.';
-                msg.className = 'login-msg error';
+            });
+
+            // Login
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                var pass = document.getElementById('loginPass').value;
+                var msg = document.getElementById('loginMsg');
+                var storedHash = localStorage.getItem('admin_hash');
+
+                var h = await hash(pass);
+                if (h === storedHash) {
+                    localStorage.setItem('admin_logado', 'true');
+                    msg.textContent = 'Login realizado! Redirecionando...';
+                    msg.className = 'login-msg success';
+                    setTimeout(function() { window.location.href = 'artigos.html'; }, 800);
+                } else {
+                    msg.textContent = 'Senha incorreta.';
+                    msg.className = 'login-msg error';
+                }
+            });
+
+            // If already logged in, redirect
+            if (storedHash && localStorage.getItem('admin_logado') === 'true') {
+                document.getElementById('loginMsg').textContent = 'Você já está logado. Redirecionando...';
+                document.getElementById('loginMsg').className = 'login-msg success';
+                setTimeout(function() { window.location.href = 'artigos.html'; }, 500);
             }
-        });
+        })();
     </script>
 </body>
 
