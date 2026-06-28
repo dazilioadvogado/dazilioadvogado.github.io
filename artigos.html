@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,128 +11,135 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigos-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
-        .artigos-page h1 { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); color: var(--white); text-align: center; margin-bottom: 0.5rem; }
-        .artigos-page .section-line { margin-bottom: 3rem; }
-        .artigos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
-        .artigo-card { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.08); padding: 2rem; transition: transform 0.35s ease, border-color 0.35s ease; }
-        .artigo-card:hover { transform: translateY(-4px); border-color: rgba(201, 167, 110, 0.2); }
-        .artigo-card h3 { font-family: var(--font-serif); color: var(--white); margin-bottom: 0.8rem; }
-        .artigo-card p { color: var(--gray); font-size: 0.95rem; margin-bottom: 1rem; }
-        .artigo-card .artigo-data { font-size: 0.8rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
-        .artigo-placeholder { text-align: center; color: var(--gray); padding: 4rem 0; font-style: italic; }
+        .artigos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+        .artigo-card { position: relative; border-radius: 2px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; height: 260px; border: 1px solid rgba(201,167,110,0.08); transition: transform 0.35s ease, box-shadow 0.35s ease; }
+        .artigo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .artigo-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.4s ease; }
+        .artigo-card:hover .artigo-card-bg { transform: scale(1.05); }
+        .artigo-card-bg.placeholder { background: linear-gradient(135deg, #162544, #0f1f3d); display: flex; align-items: center; justify-content: center; }
+        .artigo-card-bg.placeholder i { font-size: 3rem; color: var(--gold); opacity: 0.3; }
+        .artigo-card-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(10,22,40,0.95)); }
+        .artigo-card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; z-index: 1; }
+        .artigo-card-content h3 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--white); margin-bottom: 0.4rem; line-height: 1.4; }
+        .artigo-card-content .artigo-data { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .artigo-placeholder { text-align: center; color: var(--gray); padding: 4rem 2rem; font-style: italic; grid-column: 1 / -1; }
         .admin-fixed { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; }
         .admin-fixed a { display: inline-block; background: var(--navy-mid); color: var(--gold); border: 1px solid var(--gold); padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
         .admin-fixed a:hover { background: var(--gold); color: var(--navy); }
-        .admin-fixed a.logged-in { color: #2ecc71; border-color: #2ecc71; cursor: pointer; }
+        .admin-fixed a.logged-in { color: #2ecc71; border-color: #2ecc71; }
         .admin-fixed a.logged-in:hover { background: #2ecc71; color: var(--navy); }
         .publicar-fixed { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 999; display: none; }
         .publicar-fixed.visible { display: block; }
         .publicar-fixed a { display: inline-block; background: var(--navy-mid); color: #2ecc71; border: 1px solid #2ecc71; padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
         .publicar-fixed a:hover { background: #2ecc71; color: var(--navy); }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
-
 <body>
-    <nav class="nav" id="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
-            <ul class="nav-links">
-                <li><a href="index.html#sobre">Sobre</a></li>
-                <li><a href="index.html#atuacao">Atuação</a></li>
-                <li><a href="index.html#formacao">Formação</a></li>
-                <li><a href="index.html#contato">Contato</a></li>
-                <li><a href="artigos.html">Artigos</a></li>
-            </ul>
-            <button class="nav-toggle" id="navToggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
-
-    <section class="artigos-page">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Artigos</span>
-                <h1>Artigos Jurídicos</h1>
-                <div class="section-line"></div>
-            </div>
-            <div class="artigos-grid">
-                <p class="artigo-placeholder">Em breve — artigos sobre Direito Penal e Imobiliário.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-inner">
-                <div class="footer-brand">
-                    <span class="footer-logo">Advocacia Dazilio da Vitória</span>
-                </div>
-                <div class="footer-links">
-                    <a href="index.html#sobre">Sobre</a>
-                    <a href="index.html#atuacao">Atuação</a>
-                    <a href="artigos.html">Artigos</a>
-                    <a href="index.html#formacao">Formação</a>
-                    <a href="index.html#contato">Contato</a>
-                </div>
-                <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória. Todos os direitos reservados.</p>
-            </div>
-        </div>
-    </footer>
-
-    <div class="admin-fixed">
-        <a href="login.html" id="adminBtn">Acesso administrativo</a>
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+        <ul class="nav-links">
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="index.html#atuacao">Atuação</a></li>
+            <li><a href="index.html#formacao">Formação</a></li>
+            <li><a href="index.html#contato">Contato</a></li>
+            <li><a href="artigos.html">Artigos</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
+</nav>
 
-    <div class="publicar-fixed" id="publicarBtn">
-        <a href="#">Publicar artigo</a>
+<section class="artigos-page">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Artigos</span>
+            <h1>Artigos Jurídicos</h1>
+            <div class="section-line"></div>
+        </div>
+        <div class="artigos-grid" id="artigosGrid"></div>
     </div>
+</section>
 
-    <script src="script.js"></script>
-    <script>
-        (function() {
-            var firebaseConfig = {
-                apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
-                authDomain: "site-469cc.firebaseapp.com",
-                projectId: "site-469cc",
-                appId: "1:542339087164:web:7b7d10074ab065feea3c39"
-            };
+<footer class="footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitória</span></div>
+            <div class="footer-links">
+                <a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuação</a>
+                <a href="artigos.html">Artigos</a><a href="index.html#formacao">Formação</a><a href="index.html#contato">Contato</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória</p>
+        </div>
+    </div>
+</footer>
 
-            firebase.initializeApp(firebaseConfig);
+<div class="admin-fixed"><a href="login.html" id="adminBtn">Acesso administrativo</a></div>
+<div class="publicar-fixed" id="publicarBtn"><a href="criar-artigo.html">Publicar artigo</a></div>
 
-            var btn = document.getElementById('adminBtn');
-            var pub = document.getElementById('publicarBtn');
+<script src="script.js"></script>
+<script>
+(function(){
+    var firebaseConfig = {
+        apiKey: ***        authDomain: "site-469cc.firebaseapp.com",
+        projectId: "site-469cc",
+        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-            btn.addEventListener('click', function(e) {
-                if (firebase.auth().currentUser) {
-                    e.preventDefault();
-                    firebase.auth().signOut().then(function() {
-                        window.location.reload();
-                    });
-                }
-            });
+    var btn = document.getElementById('adminBtn');
+    var pub = document.getElementById('publicarBtn');
 
-            firebase.auth().onAuthStateChanged(function(user) {
-                if (user) {
-                    btn.textContent = 'LOGADO';
-                    btn.className = 'logged-in';
-                    btn.title = 'Clique para sair (' + user.email + ')';
-                    pub.classList.add('visible');
-                } else {
-                    btn.textContent = 'Acesso administrativo';
-                    btn.className = '';
-                    btn.href = 'login.html';
-                    btn.title = '';
-                    pub.classList.remove('visible');
-                }
-            });
-        })();
-    </script>
+    btn.addEventListener('click', function(e) {
+        if (firebase.auth().currentUser) {
+            e.preventDefault();
+            firebase.auth().signOut().then(function(){ window.location.reload(); });
+        }
+    });
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            btn.textContent = 'LOGADO';
+            btn.className = 'logged-in';
+            btn.title = 'Clique para sair (' + user.email + ')';
+            pub.classList.add('visible');
+        } else {
+            btn.textContent = 'Acesso administrativo';
+            btn.className = '';
+            btn.href = 'login.html';
+            btn.title = '';
+            pub.classList.remove('visible');
+        }
+    });
+
+    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
+    var grid = document.getElementById('artigosGrid');
+
+    if (artigos.length === 0) {
+        grid.innerHTML = '<p class="artigo-placeholder">Nenhum artigo publicado ainda.</p>';
+    } else {
+        var html = '';
+        artigos.forEach(function(a) {
+            var bgStyle = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
+            var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
+            var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
+            html +=
+                '<a href="artigo.html?id=' + a.id + '" class="artigo-card">' +
+                    '<div class="' + bgClass + '"' + bgStyle + '>' + icon + '</div>' +
+                    '<div class="artigo-card-overlay"></div>' +
+                    '<div class="artigo-card-content">' +
+                        '<h3>' + a.titulo + '</h3>' +
+                        '<span class="artigo-data">' + a.data + '</span>' +
+                    '</div>' +
+                '</a>';
+        });
+        grid.innerHTML = html;
+    }
+})();
+</script>
 </body>
-
 </html>

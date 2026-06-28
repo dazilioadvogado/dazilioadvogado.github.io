@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artigo — Advocacia Dazilio da Vitória</title>
+    <meta name="robots" content="index, follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .artigo-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
+        .artigo-container { max-width: 850px; margin: 0 auto; background: var(--navy-light); border: 1px solid rgba(201,167,110,0.08); }
+        .artigo-hero-img { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+        .artigo-hero-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, var(--navy-mid), var(--navy-light)); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 3rem; }
+        .artigo-body { padding: 2.5rem; }
+        .artigo-body h1 { font-family: var(--font-serif); font-size: 2rem; color: var(--white); margin-bottom: 0.5rem; line-height: 1.3; }
+        .artigo-meta { color: var(--gray); font-size: 0.85rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(201,167,110,0.1); }
+        .artigo-meta span { margin-right: 1.5rem; }
+        .artigo-meta i { color: var(--gold); margin-right: 0.3rem; }
+        .artigo-conteudo { color: var(--cream-dim); font-size: 1.05rem; line-height: 1.9; }
+        .artigo-conteudo img { max-width: 100%; height: auto; margin: 1.5rem 0; }
+        .artigo-conteudo h1,.artigo-conteudo h2,.artigo-conteudo h3 { font-family: var(--font-serif); color: var(--white); margin: 2rem 0 1rem; }
+        .artigo-conteudo blockquote { border-left: 3px solid var(--gold); padding-left: 1.5rem; color: var(--gray); margin: 1.5rem 0; font-style: italic; }
+        .artigo-conteudo a { color: var(--gold); }
+        .not-found { text-align: center; padding: 4rem 2rem; color: var(--gray); }
+        .not-found i { font-size: 3rem; color: var(--gold); margin-bottom: 1rem; display: block; }
+        .back-link { display: inline-block; margin-top: 2rem; color: var(--gold); text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+        <ul class="nav-links">
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="index.html#atuacao">Atuação</a></li>
+            <li><a href="index.html#formacao">Formação</a></li>
+            <li><a href="index.html#contato">Contato</a></li>
+            <li><a href="artigos.html">Artigos</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<section class="artigo-page">
+    <div id="artigoContainer"></div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitória</span></div>
+            <div class="footer-links">
+                <a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuação</a>
+                <a href="artigos.html">Artigos</a><a href="index.html#formacao">Formação</a><a href="index.html#contato">Contato</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória</p>
+        </div>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+(function(){
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get('id');
+    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
+    var artigo = artigos.find(function(a){ return a.id === id; });
+    var container = document.getElementById('artigoContainer');
+
+    if (!artigo) {
+        container.innerHTML = '<div class="not-found"><i class="fa-solid fa-file-circle-exclamation"></i><h2>Artigo não encontrado</h2><a href="artigos.html" class="back-link">← Voltar para Artigos</a></div>';
+        document.title = 'Artigo não encontrado';
+        return;
+    }
+
+    document.title = artigo.titulo + ' — Advocacia Dazilio da Vitória';
+
+    var imgHtml = '';
+    if (artigo.imagem) {
+        imgHtml = '<img src="' + artigo.imagem + '" alt="' + artigo.titulo + '" class="artigo-hero-img">';
+    } else {
+        imgHtml = '<div class="artigo-hero-placeholder"><i class="fa-solid fa-newspaper"></i></div>';
+    }
+
+    container.innerHTML =
+        '<div class="artigo-container">' +
+            imgHtml +
+            '<div class="artigo-body">' +
+                '<h1>' + artigo.titulo + '</h1>' +
+                '<div class="artigo-meta">' +
+                    '<span><i class="fa-solid fa-calendar"></i> ' + artigo.data + '</span>' +
+                    '<span><i class="fa-solid fa-user"></i> ' + (artigo.autor || 'Administrador') + '</span>' +
+                '</div>' +
+                '<div class="artigo-conteudo">' + artigo.conteudo + '</div>' +
+                '<a href="artigos.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Artigos</a>' +
+            '</div>' +
+        '</div>';
+})();
+</script>
+</body>
+</html>
