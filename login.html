@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Advocacia Dazilio da Vitória</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+        .login-box { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.12); padding: 3rem 2.5rem; max-width: 400px; width: 100%; text-align: center; }
+        .login-box h1 { font-family: var(--font-serif); color: var(--white); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .login-box .section-line { margin-bottom: 2rem; }
+        .login-box label { display: block; text-align: left; color: var(--gray); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
+        .login-box input { width: 100%; padding: 0.9rem 1rem; background: var(--navy); border: 1px solid rgba(201, 167, 110, 0.15); color: var(--cream-dim); font-family: var(--font-sans); font-size: 0.95rem; margin-bottom: 1.2rem; outline: none; transition: border-color 0.3s; }
+        .login-box input:focus { border-color: var(--gold); }
+        .login-box .btn { margin-top: 0.5rem; }
+        .login-msg { margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; }
+        .login-msg.error { color: #e74c3c; }
+        .login-msg.success { color: #2ecc71; }
+        .back-link { display: block; margin-top: 1.5rem; color: var(--gray); font-size: 0.85rem; text-decoration: none; }
+        .back-link:hover { color: var(--gold); }
+    </style>
+</head>
+
+<body>
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+            <ul class="nav-links">
+                <li><a href="index.html#sobre">Sobre</a></li>
+                <li><a href="index.html#atuacao">Atuação</a></li>
+                <li><a href="index.html#formacao">Formação</a></li>
+                <li><a href="index.html#contato">Contato</a></li>
+                <li><a href="artigos.html">Artigos</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="login-page">
+        <div class="login-box">
+            <h1>Área Restrita</h1>
+            <div class="section-line"></div>
+            <form id="loginForm">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" placeholder="Digite seu usuário" required>
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" required>
+                <button type="submit" class="btn btn-gold btn-full">Entrar</button>
+                <p class="login-msg" id="loginMsg"></p>
+            </form>
+            <a href="artigos.html" class="back-link">← Voltar para Artigos</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="footer-logo">Advocacia Dazilio da Vitória</span>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html#sobre">Sobre</a>
+                    <a href="index.html#atuacao">Atuação</a>
+                    <a href="artigos.html">Artigos</a>
+                    <a href="index.html#formacao">Formação</a>
+                    <a href="index.html#contato">Contato</a>
+                </div>
+                <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var user = document.getElementById('username').value;
+            var pass = document.getElementById('password').value;
+            var msg = document.getElementById('loginMsg');
+
+            if (user === 'admin' && pass === 'dazilio2026') {
+                localStorage.setItem('admin_logado', 'true');
+                msg.textContent = 'Login realizado com sucesso!';
+                msg.className = 'login-msg success';
+                setTimeout(function() { window.location.href = 'artigos.html'; }, 800);
+            } else {
+                msg.textContent = 'Usuário ou senha incorretos.';
+                msg.className = 'login-msg error';
+            }
+        });
+    </script>
+</body>
+
+</html>
