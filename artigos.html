@@ -41,6 +41,10 @@
         .card-delete.visible { display: block; }
         .card-delete button { background: rgba(231,76,60,0.85); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
         .card-delete button:hover { background: #e74c3c; transform: scale(1.1); }
+        .card-edit { position: absolute; top: 0.6rem; right: 2.8rem; z-index: 5; display: none; }
+        .card-edit.visible { display: block; }
+        .card-edit a { display: flex; align-items: center; justify-content: center; background: rgba(201,167,110,0.85); border: none; color: var(--navy); width: 30px; height: 30px; border-radius: 50%; text-decoration: none; font-size: 0.7rem; transition: all 0.2s; }
+        .card-edit a:hover { background: var(--gold); transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -112,14 +116,14 @@
             btn.className = 'logged-in';
             btn.title = 'Clique para sair (' + user.email + ')';
             pub.classList.add('visible');
-            document.querySelectorAll('.card-delete').forEach(function(d){ d.classList.add('visible'); });
+            document.querySelectorAll('.card-delete,.card-edit').forEach(function(d){ d.classList.add('visible'); });
         } else {
             btn.textContent = 'Acesso administrativo';
             btn.className = '';
             btn.href = 'login.html';
             btn.title = '';
             pub.classList.remove('visible');
-            document.querySelectorAll('.card-delete').forEach(function(d){ d.classList.remove('visible'); });
+            document.querySelectorAll('.card-delete,.card-edit').forEach(function(d){ d.classList.remove('visible'); });
         }
     });
 
@@ -137,6 +141,7 @@
                 var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
                 var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
                 var delClass = isAdmin ? 'card-delete visible' : 'card-delete';
+                var editClass = isAdmin ? 'card-edit visible' : 'card-edit';
                 html +=
                     '<div class="artigo-card" style="position:relative;">' +
                         '<a href="artigo.html?id=' + a.id + '" style="position:absolute;inset:0;z-index:1;"></a>' +
@@ -145,6 +150,11 @@
                         '<div class="artigo-card-content">' +
                             '<h3>' + a.titulo + '</h3>' +
                             '<span class="artigo-data">' + a.data + '</span>' +
+                        '</div>' +
+                        '<div class="' + editClass + '">' +
+                            '<a href="editar-artigo.html?id=' + a.id + '" title="Editar artigo" onclick="event.stopPropagation();">' +
+                                '<i class="fa-solid fa-pen"></i>' +
+                            '</a>' +
                         '</div>' +
                         '<div class="' + delClass + '">' +
                             '<button onclick="event.stopPropagation();deletarArtigo(\'' + a.id + '\')" title="Excluir artigo">' +
