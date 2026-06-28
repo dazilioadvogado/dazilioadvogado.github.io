@@ -156,7 +156,7 @@
                 clearLockout();
                 msg.textContent = 'Login realizado! Redirecionando...';
                 msg.className = 'login-msg success';
-                setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
+                setTimeout(function(){ var ret2=new URLSearchParams(location.search).get('ret')||'artigos.html';window.location.href=ret2; }, 800);
             })
             .catch(function(error) {
                 recordFailedAttempt();
