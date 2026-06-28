@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .editor-page { padding: 7rem 2rem 4rem; min-height: 100vh; }
@@ -128,88 +129,91 @@
     </div>
 </footer>
 
+<script src="firebase-config.js"></script>
 <script src="script.js"></script>
 <script>
 (function(){
-    var firebaseConfig = {
-        apiKey: ***        authDomain: "site-469cc.firebaseapp.com",
-        projectId: "site-469cc",
-        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
-    };
-    firebase.initializeApp(firebaseConfig);
-
     firebase.auth().onAuthStateChanged(function(user) {
         if (!user) { window.location.href = 'artigos.html'; }
     });
 
     var params = new URLSearchParams(window.location.search);
     var artigoId = params.get('id');
-    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
-    var artigo = artigos.find(function(a){ return a.id === artigoId; });
+    var artigo = null;
 
-    if (!artigo) {
-        document.querySelector('.editor-container').innerHTML = '<h1>Artigo nao encontrado</h1><div class="section-line"></div><a href="artigos.html" class="btn btn-outline">Voltar</a>';
-        return;
-    }
-
-    var base64Image = artigo.imagem || null;
-
-    document.getElementById('artTitulo').value = artigo.titulo;
-    document.getElementById('editor').innerHTML = artigo.conteudo;
-    if (artigo.imagem) {
-        var preview = document.getElementById('imgPreview');
-        preview.src = artigo.imagem;
-        preview.style.display = 'block';
-    }
-
-    document.getElementById('artImagem').addEventListener('change', function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 2 * 1024 * 1024) { alert('Imagem muito grande. Maximo 2MB.'); return; }
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-            base64Image = ev.target.result;
-            var p = document.getElementById('imgPreview');
-            p.src = base64Image;
-            p.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    });
-
-    document.getElementById('toolbar').addEventListener('click', function(e) {
-        var btn = e.target.closest('button');
-        if (!btn) return;
-        e.preventDefault();
-        var cmd = btn.dataset.cmd;
-        if (cmd === 'createLink') {
-            var url = prompt('URL do link:');
-            if (url) document.execCommand(cmd, false, url);
-        } else {
-            document.execCommand(cmd, false, null);
+    db.collection('artigos').doc(artigoId).get().then(function(doc) {
+        if (!doc.exists) {
+            document.querySelector('.editor-container').innerHTML = '<h1>Artigo nao encontrado</h1><div class="section-line"></div><a href="artigos.html" class="btn btn-outline">Voltar</a>';
+            return;
         }
-        document.getElementById('editor').focus();
-    });
+        artigo = doc;
+        var a = doc.data();
+        var base64Image = a.imagem || null;
 
-    document.getElementById('toolbar').addEventListener('change', function(e) {
-        var el = e.target;
-        if (el.tagName === 'SELECT') document.execCommand(el.dataset.cmd, false, el.value);
-        if (el.type === 'color') document.execCommand(el.dataset.cmd, false, el.value);
-        document.getElementById('editor').focus();
-    });
+        document.getElementById('artTitulo').value = a.titulo;
+        document.getElementById('editor').innerHTML = a.conteudo;
+        if (a.imagem) {
+            var preview = document.getElementById('imgPreview');
+            preview.src = a.imagem;
+            preview.style.display = 'block';
+        }
 
-    window.salvarEdicao = function() {
-        var titulo = document.getElementById('artTitulo').value.trim();
-        var conteudo = document.getElementById('editor').innerHTML.trim();
-        var msg = document.getElementById('msg');
-        if (!titulo) { msg.textContent = 'Digite um titulo.'; msg.className = 'msg error'; return; }
-        artigo.titulo = titulo;
-        artigo.conteudo = conteudo;
-        artigo.imagem = base64Image || '';
-        localStorage.setItem('artigos_publicados', JSON.stringify(artigos));
-        msg.textContent = 'Alteracoes salvas!';
-        msg.className = 'msg success';
-        setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
-    };
+        document.getElementById('artImagem').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { alert('Imagem muito grande. Maximo 2MB.'); return; }
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                base64Image = ev.target.result;
+                var p = document.getElementById('imgPreview');
+                p.src = base64Image;
+                p.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('toolbar').addEventListener('click', function(e) {
+            var btn = e.target.closest('button');
+            if (!btn) return;
+            e.preventDefault();
+            var cmd = btn.dataset.cmd;
+            if (cmd === 'createLink') {
+                var url = prompt('URL do link:');
+                if (url) document.execCommand(cmd, false, url);
+            } else {
+                document.execCommand(cmd, false, null);
+            }
+            document.getElementById('editor').focus();
+        });
+
+        document.getElementById('toolbar').addEventListener('change', function(e) {
+            var el = e.target;
+            if (el.tagName === 'SELECT') document.execCommand(el.dataset.cmd, false, el.value);
+            if (el.type === 'color') document.execCommand(el.dataset.cmd, false, el.value);
+            document.getElementById('editor').focus();
+        });
+
+        window.salvarEdicao = function() {
+            var titulo = document.getElementById('artTitulo').value.trim();
+            var conteudo = document.getElementById('editor').innerHTML.trim();
+            var msg = document.getElementById('msg');
+            if (!titulo) { msg.textContent = 'Digite um titulo.'; msg.className = 'msg error'; return; }
+            doc.ref.update({
+                titulo: titulo,
+                conteudo: conteudo,
+                imagem: base64Image || ''
+            }).then(function() {
+                msg.textContent = 'Alteracoes salvas!';
+                msg.className = 'msg success';
+                setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
+            }).catch(function() {
+                msg.textContent = 'Erro ao salvar.';
+                msg.className = 'msg error';
+            });
+        };
+    }).catch(function() {
+        document.querySelector('.editor-container').innerHTML = '<h1>Erro ao carregar</h1><div class="section-line"></div><a href="artigos.html" class="btn btn-outline">Voltar</a>';
+    });
 })();
 </script>
 </body>
