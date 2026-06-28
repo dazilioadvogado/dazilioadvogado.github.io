@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta — Advocacia Dazilio da Vitória</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+        .login-box { background: var(--navy-light); border: 1px solid rgba(201, 167, 110, 0.12); padding: 3rem 2.5rem; max-width: 420px; width: 100%; text-align: center; }
+        .login-box h1 { font-family: var(--font-serif); color: var(--white); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .login-box .section-line { margin-bottom: 2rem; }
+        .login-box label { display: block; text-align: left; color: var(--gray); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
+        .login-box input { width: 100%; padding: 0.9rem 1rem; background: var(--navy); border: 1px solid rgba(201, 167, 110, 0.15); color: var(--cream-dim); font-family: var(--font-sans); font-size: 0.95rem; margin-bottom: 1.2rem; outline: none; transition: border-color 0.3s; }
+        .login-box input:focus { border-color: var(--gold); }
+        .login-box .btn { margin-top: 0.5rem; }
+        .login-msg { margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; }
+        .login-msg.error { color: #e74c3c; }
+        .login-msg.success { color: #2ecc71; }
+        .show-password { display: flex; align-items: center; gap: 0.5rem; text-align: left; margin-bottom: 1rem; }
+        .show-password input[type=checkbox] { width: auto; margin: 0; }
+        .show-password label { font-size: 0.75rem; text-transform: none; letter-spacing: 0; margin: 0; color: var(--gray-light); }
+        .back-link { display: block; margin-top: 1.5rem; color: var(--gray); font-size: 0.85rem; text-decoration: none; }
+        .back-link:hover { color: var(--gold); }
+    </style>
+</head>
+
+<body>
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+            <ul class="nav-links">
+                <li><a href="index.html#sobre">Sobre</a></li>
+                <li><a href="index.html#atuacao">Atuação</a></li>
+                <li><a href="index.html#formacao">Formação</a></li>
+                <li><a href="index.html#contato">Contato</a></li>
+                <li><a href="artigos.html">Artigos</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="login-page">
+        <div class="login-box">
+            <h1>Criar Conta</h1>
+            <div class="section-line"></div>
+            <form id="registerForm">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="seu@email.com" required>
+                <label for="regPass">Senha</label>
+                <input type="password" id="regPass" placeholder="Mínimo 6 caracteres" required minlength="6">
+                <label for="regConfirm">Confirmar senha</label>
+                <input type="password" id="regConfirm" placeholder="Repita a senha" required minlength="6">
+                <div class="show-password">
+                    <input type="checkbox" id="showReg">
+                    <label for="showReg">Mostrar senha</label>
+                </div>
+                <button type="submit" class="btn btn-gold btn-full">Criar Conta</button>
+                <p class="login-msg" id="regMsg"></p>
+            </form>
+            <p style="margin-top:1.5rem; color:var(--gray); font-size:0.85rem;">Já tem conta? <a href="login.html" style="color:var(--gold);">Faça login</a></p>
+            <a href="artigos.html" class="back-link">← Voltar para Artigos</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="footer-logo">Advocacia Dazilio da Vitória</span>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html#sobre">Sobre</a>
+                    <a href="index.html#atuacao">Atuação</a>
+                    <a href="artigos.html">Artigos</a>
+                    <a href="index.html#formacao">Formação</a>
+                    <a href="index.html#contato">Contato</a>
+                </div>
+                <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
+            authDomain: "site-469cc.firebaseapp.com",
+            projectId: "site-469cc",
+            storageBucket: "site-469cc.firebasestorage.app",
+            messagingSenderId: "542339087164",
+            appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('showReg').addEventListener('change', function() {
+            var t = this.checked ? 'text' : 'password';
+            document.getElementById('regPass').type = t;
+            document.getElementById('regConfirm').type = t;
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var email = document.getElementById('regEmail').value.trim();
+            var pass = document.getElementById('regPass').value;
+            var confirm = document.getElementById('regConfirm').value;
+            var msg = document.getElementById('regMsg');
+            var btn = this.querySelector('button');
+
+            if (pass.length < 6) {
+                msg.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                msg.className = 'login-msg error';
+                return;
+            }
+            if (pass !== confirm) {
+                msg.textContent = 'As senhas não conferem.';
+                msg.className = 'login-msg error';
+                return;
+            }
+
+            btn.textContent = 'Criando...';
+            btn.disabled = true;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                msg.textContent = 'Conta criada com sucesso! Redirecionando...';
+                msg.className = 'login-msg success';
+                setTimeout(function() { window.location.href = 'artigos.html'; }, 1000);
+            } catch (err) {
+                btn.textContent = 'Criar Conta';
+                btn.disabled = false;
+                if (err.code === 'auth/email-already-in-use') {
+                    msg.textContent = 'Este email já está cadastrado.';
+                } else if (err.code === 'auth/invalid-email') {
+                    msg.textContent = 'Email inválido.';
+                } else if (err.code === 'auth/weak-password') {
+                    msg.textContent = 'Senha muito fraca. Use no mínimo 6 caracteres.';
+                } else {
+                    msg.textContent = 'Erro ao criar conta. Tente novamente.';
+                }
+                msg.className = 'login-msg error';
+            }
+        });
+    </script>
+</body>
+
+</html>
