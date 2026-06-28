@@ -29,6 +29,10 @@
         .admin-fixed a:hover { background: var(--gold); color: var(--navy); }
         .admin-fixed a.logged-in { color: #2ecc71; border-color: #2ecc71; }
         .admin-fixed a.logged-in:hover { background: #2ecc71; color: var(--navy); }
+        .publicar-fixed { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 999; display: none; }
+        .publicar-fixed.visible { display: block; }
+        .publicar-fixed a { display: inline-block; background: var(--navy-mid); color: #2ecc71; border: 1px solid #2ecc71; padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
+        .publicar-fixed a:hover { background: #2ecc71; color: var(--navy); }
     </style>
 </head>
 
@@ -84,15 +88,21 @@
         <a href="login.html" id="adminBtn">Acesso administrativo</a>
     </div>
 
+    <div class="publicar-fixed" id="publicarBtn">
+        <a href="#">Publicar artigo</a>
+    </div>
+
     <script src="script.js"></script>
     <script>
         (function() {
             var btn = document.getElementById('adminBtn');
+            var pub = document.getElementById('publicarBtn');
             if (localStorage.getItem('admin_logado') === 'true') {
                 btn.textContent = 'LOGADO';
                 btn.className = 'logged-in';
                 btn.href = '#';
                 btn.title = 'Você já está logado';
+                pub.classList.add('visible');
             }
         })();
     </script>
