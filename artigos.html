@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigos-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
@@ -38,10 +37,6 @@
         .publicar-fixed.visible { display: block; }
         .publicar-fixed a { display: inline-block; background: var(--navy-mid); color: #2ecc71; border: 1px solid #2ecc71; padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
         .publicar-fixed a:hover { background: #2ecc71; color: var(--navy); }
-        .card-delete { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 5; display: none; }
-        .card-delete.visible { display: block; }
-        .card-delete button { background: rgba(231,76,60,0.85); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
-        .card-delete button:hover { background: #e74c3c; transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -88,21 +83,64 @@
 
 <script src="script.js"></script>
 <script>
-var btn=document.getElementById('adminBtn'),pub=document.getElementById('publicarBtn');
-var firebaseConfig={apiKey:AIza.....9cc,projectId:"site-469cc",appId:"1:542339087164:web:7b7d10074ab065feea3c39"};
-firebase.initializeApp(firebaseConfig);
-var db=firebase.firestore();
-btn.addEventListener('click',function(e){if(firebase.auth().currentUser){e.preventDefault();firebase.auth().signOut().then(function(){location.reload()})}});
-firebase.auth().onAuthStateChanged(function(u){
-  if(u){btn.textContent='LOGADO';btn.className='logged-in';btn.title='Clique para sair ('+u.email+')';pub.classList.add('visible')}
-  else{btn.textContent='Acesso administrativo';btn.className='';btn.href='login.html';btn.title='';pub.classList.remove('visible')}
-});
-function render(){db.collection('artigos').orderBy('createdAt','desc').get().then(function(s){
-  var g=document.getElementById('artigosGrid'),ad=!!firebase.auth().currentUser;
-  if(s.empty){g.innerHTML='<p class="artigo-placeholder">Nenhum artigo ainda.</p>';return}
-  var h='';s.forEach(function(d){var a=d.data();var bg=a.imagem?' style="background-image:url('+a.imagem+')"':'';var bc=a.imagem?'artigo-card-bg':'artigo-card-bg placeholder';var ic=a.imagem?'':'<i class="fa-solid fa-newspaper"></i>';h+='<div class="artigo-card" data-id="'+d.id+'"><a href="artigo.html?id='+d.id+'" style="position:absolute;inset:0;z-index:1"></a><div class="'+bc+'"'+bg+'>'+ic+'</div><div class="artigo-card-overlay"></div><div class="artigo-card-content"><h3>'+a.titulo+'</h3><span class="artigo-data">'+a.data+'</span></div>'+(ad?'<div class="card-edit visible"><a href="editar-artigo.html?id='+d.id+'" onclick="event.stopPropagation()"><i class="fa-solid fa-pen"></i></a></div><div class="card-delete visible"><button onclick="event.stopPropagation();del(\''+d.id+'\')"><i class="fa-solid fa-trash"></i></button></div>':'')+'</div>'});g.innerHTML=h}).catch(function(e){document.getElementById('artigosGrid').innerHTML='<p class="artigo-placeholder">Erro ao carregar.</p>'})}
-window.del=function(id){if(!confirm('Excluir?'))return;db.collection('artigos').doc(id).delete().then(function(){render()})};
-render();
+(function(){
+    var firebaseConfig = {
+        apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
+        authDomain: "site-469cc.firebaseapp.com",
+        projectId: "site-469cc",
+        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    var btn = document.getElementById('adminBtn');
+    var pub = document.getElementById('publicarBtn');
+
+    btn.addEventListener('click', function(e) {
+        if (firebase.auth().currentUser) {
+            e.preventDefault();
+            firebase.auth().signOut().then(function(){ window.location.reload(); });
+        }
+    });
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            btn.textContent = 'LOGADO';
+            btn.className = 'logged-in';
+            btn.title = 'Clique para sair (' + user.email + ')';
+            pub.classList.add('visible');
+        } else {
+            btn.textContent = 'Acesso administrativo';
+            btn.className = '';
+            btn.href = 'login.html';
+            btn.title = '';
+            pub.classList.remove('visible');
+        }
+    });
+
+    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
+    var grid = document.getElementById('artigosGrid');
+
+    if (artigos.length === 0) {
+        grid.innerHTML = '<p class="artigo-placeholder">Nenhum artigo publicado ainda.</p>';
+    } else {
+        var html = '';
+        artigos.forEach(function(a) {
+            var bgStyle = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
+            var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
+            var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
+            html +=
+                '<a href="artigo.html?id=' + a.id + '" class="artigo-card">' +
+                    '<div class="' + bgClass + '"' + bgStyle + '>' + icon + '</div>' +
+                    '<div class="artigo-card-overlay"></div>' +
+                    '<div class="artigo-card-content">' +
+                        '<h3>' + a.titulo + '</h3>' +
+                        '<span class="artigo-data">' + a.data + '</span>' +
+                    '</div>' +
+                '</a>';
+        });
+        grid.innerHTML = html;
+    }
+})();
 </script>
 </body>
 </html>

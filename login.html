@@ -61,7 +61,7 @@
             <div class="section-line"></div>
             <p id="loggedInMsg">Verificando...</p>
             <div class="btn-row">
-                <button class="btn btn-gold" id="btnContinue">Continuar</button>
+                <button class="btn btn-gold" onclick="window.location.href='artigos.html'">Continuar para Artigos</button>
                 <button class="btn btn-outline" id="btnLogout">Sair</button>
             </div>
         </div>
@@ -127,8 +127,6 @@
             loggedInBox.classList.add('visible');
             loginFormBox.style.display = 'none';
             document.getElementById('loggedInMsg').textContent = 'Você já está logado como ' + user.email + '.';
-            var ret = new URLSearchParams(window.location.search).get('ret') || 'artigos.html';
-            document.getElementById('btnContinue').onclick = function(){ window.location.href = ret; };
         } else {
             loggedInBox.classList.remove('visible');
             loginFormBox.style.display = 'block';
@@ -158,8 +156,7 @@
                 clearLockout();
                 msg.textContent = 'Login realizado! Redirecionando...';
                 msg.className = 'login-msg success';
-                var ret2 = new URLSearchParams(window.location.search).get('ret') || 'artigos.html';
-                setTimeout(function(){ window.location.href = ret2; }, 800);
+                setTimeout(function(){ window.location.href = 'artigos.html'; }, 800);
             })
             .catch(function(error) {
                 recordFailedAttempt();

@@ -138,7 +138,7 @@
                 await createUserWithEmailAndPassword(auth, email, pass);
                 msg.textContent = 'Conta criada com sucesso! Redirecionando...';
                 msg.className = 'login-msg success';
-                setTimeout(function() { var ret = new URLSearchParams(window.location.search).get('ret') || 'artigos.html'; window.location.href = ret; }, 1000);
+                setTimeout(function() { window.location.href = 'artigos.html'; }, 1000);
             } catch (err) {
                 btn.textContent = 'Criar Conta';
                 btn.disabled = false;
