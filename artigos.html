@@ -16,82 +16,92 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        .artigos-page{padding:8rem 2rem 4rem;min-height:100vh}
-        .artigos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto}
-        .artigo-card{position:relative;border-radius:2px;overflow:hidden;cursor:pointer;text-decoration:none;display:block;height:260px;border:1px solid rgba(201,167,110,0.08);transition:transform .35s ease,box-shadow .35s ease}
-        .artigo-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.4)}
-        .artigo-card-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .4s ease}
-        .artigo-card:hover .artigo-card-bg{transform:scale(1.05)}
-        .artigo-card-bg.placeholder{background:linear-gradient(135deg,#162544,#0f1f3d);display:flex;align-items:center;justify-content:center}
-        .artigo-card-bg.placeholder i{font-size:3rem;color:var(--gold);opacity:.3}
-        .artigo-card-overlay{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(10,22,40,.95))}
-        .artigo-card-content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;z-index:1}
-        .artigo-card-content h3{font-family:var(--font-serif);font-size:1.2rem;color:var(--white);margin-bottom:.4rem;line-height:1.4}
-        .artigo-card-content .artigo-data{font-size:.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
-        .artigo-placeholder{text-align:center;color:var(--gray);padding:4rem 2rem;font-style:italic;grid-column:1/-1}
-        .admin-fixed{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999}
-        .admin-fixed a{display:inline-block;background:var(--navy-mid);color:var(--gold);border:1px solid var(--gold);padding:.6rem 1.2rem;font-size:.8rem;text-transform:uppercase;letter-spacing:1px;text-decoration:none;transition:var(--transition)}
-        .admin-fixed a:hover{background:var(--gold);color:var(--navy)}
-        .admin-fixed a.logged-in{color:#2ecc71;border-color:#2ecc71}
-        .admin-fixed a.logged-in:hover{background:#2ecc71;color:var(--navy)}
-        .publicar-fixed{position:fixed;bottom:1.5rem;left:1.5rem;z-index:999;display:none}
-        .publicar-fixed.visible{display:block}
-        .publicar-fixed a{display:inline-block;background:var(--navy-mid);color:#2ecc71;border:1px solid #2ecc71;padding:.6rem 1.2rem;font-size:.8rem;text-transform:uppercase;letter-spacing:1px;text-decoration:none;transition:var(--transition)}
-        .publicar-fixed a:hover{background:#2ecc71;color:var(--navy)}
-        .card-delete{position:absolute;top:.6rem;right:.6rem;z-index:5;display:none}
-        .card-delete.visible{display:block}
-        .card-delete button{background:rgba(231,76,60,.85);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.75rem;transition:all .2s}
-        .card-delete button:hover{background:#e74c3c;transform:scale(1.1)}
-        .card-edit{position:absolute;top:.6rem;right:2.8rem;z-index:5;display:none}
-        .card-edit.visible{display:block}
-        .card-edit a{display:flex;align-items:center;justify-content:center;background:rgba(201,167,110,.85);border:none;color:var(--navy);width:30px;height:30px;border-radius:50%;text-decoration:none;font-size:.7rem;transition:all .2s}
-        .card-edit a:hover{background:var(--gold);transform:scale(1.1)}
+        .artigos-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
+        .artigos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+        .artigo-card { position: relative; border-radius: 2px; overflow: hidden; cursor: pointer; text-decoration: none; display: block; height: 260px; border: 1px solid rgba(201,167,110,0.08); transition: transform 0.35s ease, box-shadow 0.35s ease; }
+        .artigo-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .artigo-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.4s ease; }
+        .artigo-card:hover .artigo-card-bg { transform: scale(1.05); }
+        .artigo-card-bg.placeholder { background: linear-gradient(135deg, #162544, #0f1f3d); display: flex; align-items: center; justify-content: center; }
+        .artigo-card-bg.placeholder i { font-size: 3rem; color: var(--gold); opacity: 0.3; }
+        .artigo-card-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(10,22,40,0.95)); }
+        .artigo-card-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; z-index: 1; }
+        .artigo-card-content h3 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--white); margin-bottom: 0.4rem; line-height: 1.4; }
+        .artigo-card-content .artigo-data { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .artigo-placeholder { text-align: center; color: var(--gray); padding: 4rem 2rem; font-style: italic; grid-column: 1 / -1; }
+        .admin-fixed { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; }
+        .admin-fixed a { display: inline-block; background: var(--navy-mid); color: var(--gold); border: 1px solid var(--gold); padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
+        .admin-fixed a:hover { background: var(--gold); color: var(--navy); }
+        .admin-fixed a.logged-in { color: #2ecc71; border-color: #2ecc71; }
+        .admin-fixed a.logged-in:hover { background: #2ecc71; color: var(--navy); }
+        .publicar-fixed { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 999; display: none; }
+        .publicar-fixed.visible { display: block; }
+        .publicar-fixed a { display: inline-block; background: var(--navy-mid); color: #2ecc71; border: 1px solid #2ecc71; padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
+        .publicar-fixed a:hover { background: #2ecc71; color: var(--navy); }
+        .card-delete { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 5; display: none; }
+        .card-delete.visible { display: block; }
+        .card-delete button { background: rgba(231,76,60,0.85); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+        .card-delete button:hover { background: #e74c3c; transform: scale(1.1); }
     </style>
 </head>
 <body>
-<nav class="nav" id="nav"><div class="nav-inner"><a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a><ul class="nav-links"><li><a href="index.html#sobre">Sobre</a></li><li><a href="index.html#atuacao">Atuação</a></li><li><a href="index.html#formacao">Formação</a></li><li><a href="index.html#contato">Contato</a></li><li><a href="artigos.html">Artigos</a></li></ul><button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button></div></nav>
-<section class="artigos-page"><div class="container"><div class="section-header"><span class="section-tag">Artigos</span><h1>Artigos Jurídicos</h1><div class="section-line"></div></div><div class="artigos-grid" id="artigosGrid"><p class="artigo-placeholder">Carregando...</p></div></div></section>
-<footer class="footer"><div class="container"><div class="footer-inner"><div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitória</span></div><div class="footer-links"><a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuação</a><a href="artigos.html">Artigos</a><a href="index.html#formacao">Formação</a><a href="index.html#contato">Contato</a></div><p class="footer-copy">&copy; 2026</p></div></div></footer>
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Advocacia Dazilio da Vitória</a>
+        <ul class="nav-links">
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="index.html#atuacao">Atuação</a></li>
+            <li><a href="index.html#formacao">Formação</a></li>
+            <li><a href="index.html#contato">Contato</a></li>
+            <li><a href="artigos.html">Artigos</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+</nav>
+
+<section class="artigos-page">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Artigos</span>
+            <h1>Artigos Jurídicos</h1>
+            <div class="section-line"></div>
+        </div>
+        <div class="artigos-grid" id="artigosGrid"></div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand"><span class="footer-logo">Advocacia Dazilio da Vitória</span></div>
+            <div class="footer-links">
+                <a href="index.html#sobre">Sobre</a><a href="index.html#atuacao">Atuação</a>
+                <a href="artigos.html">Artigos</a><a href="index.html#formacao">Formação</a><a href="index.html#contato">Contato</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Advocacia Dazilio da Vitória</p>
+        </div>
+    </div>
+</footer>
+
 <div class="admin-fixed"><a href="login.html" id="adminBtn">Acesso administrativo</a></div>
 <div class="publicar-fixed" id="publicarBtn"><a href="criar-artigo.html">Publicar artigo</a></div>
-<script src="firebase-config.js"></script>
+
 <script src="script.js"></script>
 <script>
 var btn=document.getElementById('adminBtn'),pub=document.getElementById('publicarBtn');
+var firebaseConfig={apiKey:AIza.....9cc,projectId:"site-469cc",appId:"1:542339087164:web:7b7d10074ab065feea3c39"};
+firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
 btn.addEventListener('click',function(e){if(firebase.auth().currentUser){e.preventDefault();firebase.auth().signOut().then(function(){location.reload()})}});
 firebase.auth().onAuthStateChanged(function(u){
   if(u){btn.textContent='LOGADO';btn.className='logged-in';btn.title='Clique para sair ('+u.email+')';pub.classList.add('visible')}
   else{btn.textContent='Acesso administrativo';btn.className='';btn.href='login.html';btn.title='';pub.classList.remove('visible')}
 });
-
-function buildCard(doc){
-  var a=doc.data(),isAdmin=!!firebase.auth().currentUser;
-  var bg=a.imagem?' style="background-image:url('+a.imagem+')"':'';
-  var bc=a.imagem?'artigo-card-bg':'artigo-card-bg placeholder';
-  var ic=a.imagem?'':'<i class="fa-solid fa-newspaper"></i>';
-  return '<div class="artigo-card" data-id="'+doc.id+'">'+
-    '<a href="artigo.html?id='+doc.id+'" style="position:absolute;inset:0;z-index:1"></a>'+
-    '<div class="'+bc+'"'+bg+'>'+ic+'</div>'+
-    '<div class="artigo-card-overlay"></div>'+
-    '<div class="artigo-card-content"><h3>'+a.titulo+'</h3><span class="artigo-data">'+a.data+'</span></div>'+
-    '<div class="card-edit'+(isAdmin?' visible':'')+'"><a href="editar-artigo.html?id='+doc.id+'" title="Editar" onclick="event.stopPropagation()"><i class="fa-solid fa-pen"></i></a></div>'+
-    '<div class="card-delete'+(isAdmin?' visible':'')+'"><button onclick="event.stopPropagation();deletarArtigo(\''+doc.id+'\')" title="Excluir"><i class="fa-solid fa-trash"></i></button></div>'+
-  '</div>';
-}
-
-function render(){
-  db.collection('artigos').orderBy('createdAt','desc').get().then(function(snap){
-    var g=document.getElementById('artigosGrid');
-    if(snap.empty){g.innerHTML='<p class="artigo-placeholder">Nenhum artigo publicado ainda.</p>';return}
-    var h='';snap.forEach(function(d){h+=buildCard(d)});g.innerHTML=h;
-  }).catch(function(e){document.getElementById('artigosGrid').innerHTML='<p class="artigo-placeholder">Erro ao carregar artigos.</p>'});
-}
-
-window.deletarArtigo=function(id){
-  if(!confirm('Excluir este artigo?'))return;
-  db.collection('artigos').doc(id).delete().then(function(){render()}).catch(function(){alert('Erro ao excluir')});
-};
-
+function render(){db.collection('artigos').orderBy('createdAt','desc').get().then(function(s){
+  var g=document.getElementById('artigosGrid'),ad=!!firebase.auth().currentUser;
+  if(s.empty){g.innerHTML='<p class="artigo-placeholder">Nenhum artigo ainda.</p>';return}
+  var h='';s.forEach(function(d){var a=d.data();var bg=a.imagem?' style="background-image:url('+a.imagem+')"':'';var bc=a.imagem?'artigo-card-bg':'artigo-card-bg placeholder';var ic=a.imagem?'':'<i class="fa-solid fa-newspaper"></i>';h+='<div class="artigo-card" data-id="'+d.id+'"><a href="artigo.html?id='+d.id+'" style="position:absolute;inset:0;z-index:1"></a><div class="'+bc+'"'+bg+'>'+ic+'</div><div class="artigo-card-overlay"></div><div class="artigo-card-content"><h3>'+a.titulo+'</h3><span class="artigo-data">'+a.data+'</span></div>'+(ad?'<div class="card-edit visible"><a href="editar-artigo.html?id='+d.id+'" onclick="event.stopPropagation()"><i class="fa-solid fa-pen"></i></a></div><div class="card-delete visible"><button onclick="event.stopPropagation();del(\''+d.id+'\')"><i class="fa-solid fa-trash"></i></button></div>':'')+'</div>'});g.innerHTML=h}).catch(function(e){document.getElementById('artigosGrid').innerHTML='<p class="artigo-placeholder">Erro ao carregar.</p>'})}
+window.del=function(id){if(!confirm('Excluir?'))return;db.collection('artigos').doc(id).delete().then(function(){render()})};
 render();
 </script>
 </body>
