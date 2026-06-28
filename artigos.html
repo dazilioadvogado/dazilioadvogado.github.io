@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigos-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
@@ -91,6 +92,7 @@
         appId: "1:542339087164:web:7b7d10074ab065feea3c39"
     };
     firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
 
     var btn = document.getElementById('adminBtn');
     var pub = document.getElementById('publicarBtn');
@@ -143,4 +145,26 @@
 })();
 </script>
 </body>
-</html>
+</htmlfunction render() {
+        var grid = document.getElementById('artigosGrid');
+        var isAdmin = !!firebase.auth().currentUser;
+        db.collection('artigos').orderBy('createdAt','desc').get().then(function(snap) {
+            if (snap.empty) { grid.innerHTML = '<p class="artigo-placeholder">Nenhum artigo ainda.</p>'; return; }
+            var html = '';
+            snap.forEach(function(doc) {
+                var a = doc.data();
+                var bg = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
+                var bc = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
+                var ic = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
+                html += '<div class="artigo-card" data-id="' + doc.id + '">' +
+                    '<a href="artigo.html?id=' + doc.id + '" style="position:absolute;inset:0;z-index:1;"></a>' +
+                    '<div class="' + bc + '"' + bg + '>' + ic + '</div>' +
+                    '<div class="artigo-card-overlay"></div>' +
+                    '<div class="artigo-card-content"><h3>' + a.titulo + '</h3><span class="artigo-data">' + a.data + '</span></div>' +
+                    (isAdmin ? '<div class="card-delete visible"><button onclick="event.stopPropagation();del('' + doc.id + '')"><i class="fa-solid fa-trash"></i></button></div>' : '') +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+        }).catch(function() { grid.innerHTML = '<p class="artigo-placeholder">Erro ao carregar.</p>'; });
+    }
+>

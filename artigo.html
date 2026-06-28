@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigo-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
@@ -65,6 +66,15 @@
     </div>
 </footer>
 
+<script>
+var firebaseConfig = {
+        apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
+        authDomain: "site-469cc.firebaseapp.com",
+        projectId: "site-469cc",
+        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+    };
+    firebase.initializeApp(firebaseConfig);
+</script>
 <script src="script.js"></script>
 <script>
 (function(){
@@ -102,6 +112,7 @@
                 '<a href="artigos.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Artigos</a>' +
             '</div>' +
         '</div>';
+}).catch(function(){ container.innerHTML = "<div class=\"not-found\"><h2>Erro</h2></div>"; });
 })();
 </script>
 </body>
