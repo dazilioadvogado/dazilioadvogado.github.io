@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigos-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
@@ -37,6 +38,9 @@
         .publicar-fixed.visible { display: block; }
         .publicar-fixed a { display: inline-block; background: var(--navy-mid); color: #2ecc71; border: 1px solid #2ecc71; padding: 0.6rem 1.2rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: var(--transition); }
         .publicar-fixed a:hover { background: #2ecc71; color: var(--navy); }
+        .card-delete { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 2; background: rgba(231,76,60,0.85); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: none; align-items: center; justify-content: center; transition: background 0.2s; }
+        .card-delete:hover { background: #c0392b; }
+        .card-delete.visible { display: flex; }
     </style>
 </head>
 <body>
@@ -115,31 +119,57 @@
             btn.title = '';
             pub.classList.remove('visible');
         }
+        renderArtigos();
     });
 
-    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
-    var grid = document.getElementById('artigosGrid');
+    var db = firebase.firestore();
 
-    if (artigos.length === 0) {
-        grid.innerHTML = '<p class="artigo-placeholder">Nenhum artigo publicado ainda.</p>';
-    } else {
-        var html = '';
-        artigos.forEach(function(a) {
-            var bgStyle = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
-            var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
-            var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
-            html +=
-                '<a href="artigo.html?id=' + a.id + '" class="artigo-card">' +
-                    '<div class="' + bgClass + '"' + bgStyle + '>' + icon + '</div>' +
-                    '<div class="artigo-card-overlay"></div>' +
-                    '<div class="artigo-card-content">' +
-                        '<h3>' + a.titulo + '</h3>' +
-                        '<span class="artigo-data">' + a.data + '</span>' +
-                    '</div>' +
-                '</a>';
+    function renderArtigos() {
+        var grid = document.getElementById('artigosGrid');
+        grid.innerHTML = '<p class="artigo-placeholder">Carregando...</p>';
+        db.collection('artigos').orderBy('createdAt', 'desc').get().then(function(snapshot) {
+            if (snapshot.empty) {
+                grid.innerHTML = '<p class="artigo-placeholder">Nenhum artigo publicado ainda.</p>';
+                return;
+            }
+            var user = firebase.auth().currentUser;
+            var html = '';
+            snapshot.forEach(function(doc) {
+                var a = doc.data();
+                a.id = doc.id;
+                var bgStyle = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
+                var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
+                var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
+                var deleteBtn = '';
+                if (user) {
+                    deleteBtn = '<button class="card-delete visible" onclick="event.stopPropagation();event.preventDefault();deletarArtigo(\'' + a.id + '\')" title="Excluir"><i class="fa-solid fa-trash"></i></button>';
+                }
+                html +=
+                    '<a href="artigo.html?id=' + a.id + '" class="artigo-card">' +
+                        '<div class="' + bgClass + '"' + bgStyle + '>' + icon + '</div>' +
+                        '<div class="artigo-card-overlay"></div>' +
+                        '<div class="artigo-card-content">' +
+                            '<h3>' + a.titulo + '</h3>' +
+                            '<span class="artigo-data">' + (a.data || '') + '</span>' +
+                        '</div>' +
+                        deleteBtn +
+                    '</a>';
+            });
+            grid.innerHTML = html;
+        }).catch(function(err) {
+            console.error('Firestore error:', err);
+            grid.innerHTML = '<p class="artigo-placeholder">Erro ao carregar artigos.</p>';
         });
-        grid.innerHTML = html;
     }
+
+    window.deletarArtigo = function(id) {
+        if (!confirm('Excluir este artigo permanentemente?')) return;
+        db.collection('artigos').doc(id).delete().then(function() {
+            renderArtigos();
+        }).catch(function(err) {
+            alert('Erro ao excluir: ' + err.message);
+        });
+    };
 })();
 </script>
 </body>

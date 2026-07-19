@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .artigo-page { padding: 8rem 2rem 4rem; min-height: 100vh; }
@@ -68,40 +69,59 @@
 <script src="script.js"></script>
 <script>
 (function(){
+    var firebaseConfig = {
+        apiKey: "AIzaSyCUt4MLFgNYR5_0dkqBfSswDSl2Fc-5PqY",
+        authDomain: "site-469cc.firebaseapp.com",
+        projectId: "site-469cc",
+        appId: "1:542339087164:web:7b7d10074ab065feea3c39"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
     var params = new URLSearchParams(window.location.search);
     var id = params.get('id');
-    var artigos = JSON.parse(localStorage.getItem('artigos_publicados') || '[]');
-    var artigo = artigos.find(function(a){ return a.id === id; });
     var container = document.getElementById('artigoContainer');
 
-    if (!artigo) {
+    if (!id) {
         container.innerHTML = '<div class="not-found"><i class="fa-solid fa-file-circle-exclamation"></i><h2>Artigo não encontrado</h2><a href="artigos.html" class="back-link">← Voltar para Artigos</a></div>';
         document.title = 'Artigo não encontrado';
         return;
     }
 
-    document.title = artigo.titulo + ' — Advocacia Dazilio da Vitória';
+    db.collection('artigos').doc(id).get().then(function(doc) {
+        if (!doc.exists) {
+            container.innerHTML = '<div class="not-found"><i class="fa-solid fa-file-circle-exclamation"></i><h2>Artigo não encontrado</h2><a href="artigos.html" class="back-link">← Voltar para Artigos</a></div>';
+            document.title = 'Artigo não encontrado';
+            return;
+        }
 
-    var imgHtml = '';
-    if (artigo.imagem) {
-        imgHtml = '<img src="' + artigo.imagem + '" alt="' + artigo.titulo + '" class="artigo-hero-img">';
-    } else {
-        imgHtml = '<div class="artigo-hero-placeholder"><i class="fa-solid fa-newspaper"></i></div>';
-    }
+        var artigo = doc.data();
+        document.title = artigo.titulo + ' — Advocacia Dazilio da Vitória';
 
-    container.innerHTML =
-        '<div class="artigo-container">' +
-            imgHtml +
-            '<div class="artigo-body">' +
-                '<h1>' + artigo.titulo + '</h1>' +
-                '<div class="artigo-meta">' +
-                    '<span><i class="fa-solid fa-calendar"></i> ' + artigo.data + '</span>' +
-                    '<span><i class="fa-solid fa-user"></i> ' + (artigo.autor || 'Administrador') + '</span>' +
+        var imgHtml = '';
+        if (artigo.imagem) {
+            imgHtml = '<img src="' + artigo.imagem + '" alt="' + artigo.titulo + '" class="artigo-hero-img">';
+        } else {
+            imgHtml = '<div class="artigo-hero-placeholder"><i class="fa-solid fa-newspaper"></i></div>';
+        }
+
+        container.innerHTML =
+            '<div class="artigo-container">' +
+                imgHtml +
+                '<div class="artigo-body">' +
+                    '<h1>' + artigo.titulo + '</h1>' +
+                    '<div class="artigo-meta">' +
+                        '<span><i class="fa-solid fa-calendar"></i> ' + (artigo.data || '') + '</span>' +
+                        '<span><i class="fa-solid fa-user"></i> ' + (artigo.autor || 'Administrador') + '</span>' +
+                    '</div>' +
+                    '<div class="artigo-conteudo">' + artigo.conteudo + '</div>' +
+                    '<a href="artigos.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Artigos</a>' +
                 '</div>' +
-                '<div class="artigo-conteudo">' + artigo.conteudo + '</div>' +
-                '<a href="artigos.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Artigos</a>' +
-            '</div>' +
-        '</div>';
+            '</div>';
+    }).catch(function(err) {
+        container.innerHTML = '<div class="not-found"><i class="fa-solid fa-triangle-exclamation"></i><h2>Erro ao carregar</h2><p style="color:var(--gray)">' + err.message + '</p><a href="artigos.html" class="back-link">← Voltar para Artigos</a></div>';
+        document.title = 'Erro — Advocacia Dazilio da Vitória';
+    });
 })();
 </script>
 </body>
