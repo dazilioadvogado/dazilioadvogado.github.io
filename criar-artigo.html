@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .editor-page { padding: 7rem 2rem 4rem; min-height: 100vh; }
@@ -74,12 +73,7 @@
             <img id="imgPreview" class="img-preview" alt="Preview">
         </div>
 
-        <label>Vídeo do computador (opcional)</label>
-        <div class="img-upload">
-            <label for="artVideoFile"><i class="fa-solid fa-upload"></i> Enviar vídeo do PC</label>
-            <input type="file" id="artVideoFile" accept="video/*">
-        </div>
-        <label>Ou link do YouTube</label>
+        <label>Vídeo do YouTube (opcional)</label>
         <input type="text" id="artVideo" placeholder="https://www.youtube.com/watch?v=...">
 
         <label>Conteúdo</label>
@@ -211,30 +205,6 @@
             preview.style.display = 'block';
         };
         reader.readAsDataURL(file);
-    });
-
-    document.getElementById('artVideoFile').addEventListener('change', function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 200 * 1024 * 1024) { alert('Vídeo muito grande. Máximo 200MB.'); return; }
-        var msg = document.getElementById('msg');
-        msg.textContent = 'Enviando vídeo: 0%...';
-        msg.className = 'msg';
-        var storageRef = firebase.storage().ref('videos/' + Date.now() + '_' + file.name);
-        var task = storageRef.put(file);
-        task.on('state_changed', function(snapshot) {
-            var pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            msg.textContent = 'Enviando vídeo: ' + pct + '%...';
-        }, function(err) {
-            msg.textContent = 'Erro no envio: ' + err.message;
-            msg.className = 'msg error';
-        }, function() {
-            task.snapshot.ref.getDownloadURL().then(function(url) {
-                document.getElementById('artVideo').value = url;
-                msg.textContent = 'Vídeo enviado! Agora clique em Publicar (ou Salvar).';
-                msg.className = 'msg success';
-            });
-        });
     });
 
     document.getElementById('toolbar').addEventListener('click', function(e) {
