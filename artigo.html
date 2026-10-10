@@ -32,6 +32,12 @@
         .not-found i { font-size: 3rem; color: var(--gold); margin-bottom: 1rem; display: block; }
         .back-link { display: inline-block; margin-top: 2rem; color: var(--gold); text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
+        .artigo-video { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 2rem; background: #000; }
+        .artigo-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .artigo-adminbar { display: none; padding: 0.8rem 2.5rem; background: var(--navy-mid); border-bottom: 1px solid rgba(201,167,110,0.15); text-align: right; }
+        .artigo-adminbar.visible { display: block; }
+        .artigo-adminbar a { color: var(--gold); text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .artigo-adminbar a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -98,6 +104,41 @@
         var artigo = doc.data();
         document.title = artigo.titulo + ' — Advocacia Dazilio da Vitória';
 
+        var plainText = (artigo.conteudo || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        var resumo = plainText.substring(0, 155);
+        setMeta('description', resumo);
+        var pageUrl = 'https://dazilioadvogado.github.io/artigo.html?id=' + id;
+        setCanonical(pageUrl);
+
+        var articleLd = {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            'headline': artigo.titulo,
+            'description': resumo,
+            'url': pageUrl,
+            'author': { '@type': 'Person', 'name': artigo.autor || 'Advocacia Dazilio da Vitória' },
+            'publisher': { '@type': 'Attorney', 'name': 'Advocacia Dazilio da Vitória', 'url': 'https://dazilioadvogado.github.io/' },
+            'datePublished': artigo.data || ''
+        };
+        if (artigo.imagem && artigo.imagem.indexOf('http') === 0) { articleLd.image = artigo.imagem; }
+        if (artigo.video) { articleLd.video = { '@type': 'VideoObject', 'name': artigo.titulo, 'description': resumo, 'embedUrl': artigo.video }; }
+        var ld = document.createElement('script');
+        ld.type = 'application/ld+json';
+        ld.text = JSON.stringify(articleLd);
+        document.head.appendChild(ld);
+
+        function setMeta(name, content) {
+            var el = document.querySelector('meta[name="' + name + '"]');
+            if (!el) { el = document.createElement('meta'); el.setAttribute('name', name); document.head.appendChild(el); }
+            el.setAttribute('content', content);
+        }
+
+        function setCanonical(href) {
+            var el = document.querySelector('link[rel="canonical"]');
+            if (!el) { el = document.createElement('link'); el.setAttribute('rel', 'canonical'); document.head.appendChild(el); }
+            el.setAttribute('href', href);
+        }
+
         var imgHtml = '';
         if (artigo.imagem) {
             imgHtml = '<img src="' + artigo.imagem + '" alt="' + artigo.titulo + '" class="artigo-hero-img">';
@@ -105,8 +146,14 @@
             imgHtml = '<div class="artigo-hero-placeholder"><i class="fa-solid fa-newspaper"></i></div>';
         }
 
+        var videoHtml = '';
+        if (artigo.video) {
+            videoHtml = '<div class="artigo-video"><iframe src="' + artigo.video + '" title="' + artigo.titulo + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+        }
+
         container.innerHTML =
             '<div class="artigo-container">' +
+                '<div class="artigo-adminbar" id="adminBar"><a href="criar-artigo.html?id=' + id + '"><i class="fa-solid fa-pen"></i> Editar artigo</a></div>' +
                 imgHtml +
                 '<div class="artigo-body">' +
                     '<h1>' + artigo.titulo + '</h1>' +
@@ -114,10 +161,17 @@
                         '<span><i class="fa-solid fa-calendar"></i> ' + (artigo.data || '') + '</span>' +
                         '<span><i class="fa-solid fa-user"></i> ' + (artigo.autor || 'Administrador') + '</span>' +
                     '</div>' +
+                    videoHtml +
                     '<div class="artigo-conteudo">' + artigo.conteudo + '</div>' +
                     '<a href="artigos.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para Artigos</a>' +
                 '</div>' +
             '</div>';
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                var bar = document.getElementById('adminBar');
+                if (bar) bar.classList.add('visible');
+            }
+        });
     }).catch(function(err) {
         container.innerHTML = '<div class="not-found"><i class="fa-solid fa-triangle-exclamation"></i><h2>Erro ao carregar</h2><p style="color:var(--gray)">' + err.message + '</p><a href="artigos.html" class="back-link">← Voltar para Artigos</a></div>';
         document.title = 'Erro — Advocacia Dazilio da Vitória';

@@ -3,10 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artigos — Advocacia Dazilio da Vitória</title>
-    <meta name="description" content="Artigos jurídicos da Advocacia Dazilio da Vitória. Direito Penal, Direito Imobiliário e mais.">
+    <title>Artigos e Vídeos Jurídicos — Advogado em Vila Velha/ES | Advocacia Dazilio da Vitória</title>
+    <meta name="description" content="Artigos e vídeos sobre Direito Penal e Direito Imobiliário: flagrante, Lei de Drogas, júri, usucapião e regularização de imóveis. Advocacia Dazilio da Vitória, Vila Velha/ES.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dazilioadvogado.github.io/artigos.html">
+    <link rel="icon" type="image/png" href="https://dazilioadvogado.github.io/assets/Logo-circular.png">
+    <meta property="og:title" content="Artigos e Vídeos Jurídicos — Advocacia Dazilio da Vitória">
+    <meta property="og:description" content="Direito Penal e Imobiliário explicados de forma clara. Vila Velha/ES.">
+    <meta property="og:image" content="https://dazilioadvogado.github.io/assets/Logo-circular.png">
+    <meta property="og:url" content="https://dazilioadvogado.github.io/artigos.html">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Artigos e Vídeos Jurídicos",
+        "description": "Artigos e vídeos sobre Direito Penal e Direito Imobiliário da Advocacia Dazilio da Vitória.",
+        "url": "https://dazilioadvogado.github.io/artigos.html",
+        "publisher": {"@type": "Attorney", "name": "Advocacia Dazilio da Vitória", "url": "https://dazilioadvogado.github.io/"}
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -41,6 +58,10 @@
         .card-delete { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 2; background: rgba(231,76,60,0.85); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: none; align-items: center; justify-content: center; transition: background 0.2s; }
         .card-delete:hover { background: #c0392b; }
         .card-delete.visible { display: flex; }
+        .card-edit { position: absolute; top: 0.6rem; left: 0.6rem; z-index: 2; background: rgba(201,167,110,0.9); color: #0a1628; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.85rem; display: none; align-items: center; justify-content: center; transition: background 0.2s; }
+        .card-edit:hover { background: #e6c88a; }
+        .card-edit.visible { display: flex; }
+        .card-video-badge { position: absolute; bottom: 0.8rem; right: 0.8rem; z-index: 1; background: rgba(10,22,40,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.4); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -134,15 +155,21 @@
             }
             var user = firebase.auth().currentUser;
             var html = '';
+            var itemList = { '@context': 'https://schema.org', '@type': 'ItemList', 'itemListElement': [] };
+            var pos = 0;
             snapshot.forEach(function(doc) {
                 var a = doc.data();
                 a.id = doc.id;
+                pos++;
+                itemList.itemListElement.push({ '@type': 'ListItem', 'position': pos, 'name': a.titulo, 'url': 'https://dazilioadvogado.github.io/artigo.html?id=' + a.id });
                 var bgStyle = a.imagem ? ' style="background-image:url(' + a.imagem + ')"' : '';
                 var bgClass = a.imagem ? 'artigo-card-bg' : 'artigo-card-bg placeholder';
                 var icon = a.imagem ? '' : '<i class="fa-solid fa-newspaper"></i>';
-                var deleteBtn = '';
+                var adminBtns = '';
+                var videoBadge = a.video ? '<span class="card-video-badge" title="Contém vídeo"><i class="fa-solid fa-play"></i></span>' : '';
                 if (user) {
-                    deleteBtn = '<button class="card-delete visible" onclick="event.stopPropagation();event.preventDefault();deletarArtigo(\'' + a.id + '\')" title="Excluir"><i class="fa-solid fa-trash"></i></button>';
+                    adminBtns = '<button class="card-edit visible" onclick="event.stopPropagation();event.preventDefault();window.location.href=\'criar-artigo.html?id=' + a.id + '\'" title="Editar"><i class="fa-solid fa-pen"></i></button>' +
+                        '<button class="card-delete visible" onclick="event.stopPropagation();event.preventDefault();deletarArtigo(\'' + a.id + '\')" title="Excluir"><i class="fa-solid fa-trash"></i></button>';
                 }
                 html +=
                     '<a href="artigo.html?id=' + a.id + '" class="artigo-card">' +
@@ -152,10 +179,15 @@
                             '<h3>' + a.titulo + '</h3>' +
                             '<span class="artigo-data">' + (a.data || '') + '</span>' +
                         '</div>' +
-                        deleteBtn +
+                        videoBadge +
+                        adminBtns +
                     '</a>';
             });
             grid.innerHTML = html;
+            var ld = document.createElement('script');
+            ld.type = 'application/ld+json';
+            ld.text = JSON.stringify(itemList);
+            document.head.appendChild(ld);
         }).catch(function(err) {
             console.error('Firestore error:', err);
             grid.innerHTML = '<p class="artigo-placeholder">Erro ao carregar artigos.</p>';
