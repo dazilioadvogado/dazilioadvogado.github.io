@@ -34,6 +34,7 @@
         .back-link:hover { text-decoration: underline; }
         .artigo-video { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin-bottom: 2rem; background: #000; }
         .artigo-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .artigo-video video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; }
         .artigo-adminbar { display: none; padding: 0.8rem 2.5rem; background: var(--navy-mid); border-bottom: 1px solid rgba(201,167,110,0.15); text-align: right; }
         .artigo-adminbar.visible { display: block; }
         .artigo-adminbar a { color: var(--gold); text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
@@ -121,7 +122,12 @@
             'datePublished': artigo.data || ''
         };
         if (artigo.imagem && artigo.imagem.indexOf('http') === 0) { articleLd.image = artigo.imagem; }
-        if (artigo.video) { articleLd.video = { '@type': 'VideoObject', 'name': artigo.titulo, 'description': resumo, 'embedUrl': artigo.video }; }
+        if (artigo.video) {
+            var vObj = { '@type': 'VideoObject', 'name': artigo.titulo, 'description': resumo };
+            if (artigo.video.indexOf('youtube.com/embed') !== -1) { vObj.embedUrl = artigo.video; }
+            else { vObj.contentUrl = artigo.video; }
+            articleLd.video = vObj;
+        }
         var ld = document.createElement('script');
         ld.type = 'application/ld+json';
         ld.text = JSON.stringify(articleLd);
@@ -148,7 +154,11 @@
 
         var videoHtml = '';
         if (artigo.video) {
-            videoHtml = '<div class="artigo-video"><iframe src="' + artigo.video + '" title="' + artigo.titulo + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+            if (artigo.video.indexOf('youtube.com/embed') !== -1) {
+                videoHtml = '<div class="artigo-video"><iframe src="' + artigo.video + '" title="' + artigo.titulo + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+            } else {
+                videoHtml = '<div class="artigo-video"><video controls preload="metadata" src="' + artigo.video + '"></video></div>';
+            }
         }
 
         container.innerHTML =
